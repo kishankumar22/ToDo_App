@@ -2,6 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
+    <>
     <footer className="bg-gray-800 text-white py-6">
       <div className="container mx-auto flex flex-col items-center">
         <div className="flex space-x-4 mb-4">
@@ -27,6 +28,7 @@ const Footer = () => {
         <p className="text-center text-sm">&copy; 2024 Mezzex. All Rights Reserved.</p>
       </div>
     </footer>
+    </>
   );
 };
 

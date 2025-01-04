@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
-import TodoList from '../components/ToDoList';
+
+import AddTask from '../components/AddTask';
 
 const Homepage = () => {
   // State to manage the visibility of the notes input section
@@ -16,8 +17,8 @@ const Homepage = () => {
   return (
     <>
       <Layout>
-        <div className='min-h-screen'>
-          <TodoList/>
+        <div className='m-4'>
+          <AddTask/>
         </div>
       </Layout>
     </>

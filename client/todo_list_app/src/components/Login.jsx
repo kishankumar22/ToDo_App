@@ -25,7 +25,7 @@ const Login = () => {
   
       const data = await response.json();
       console.log('Login Success:', data);
-      alert("welcome to ",data.username);
+      alert("welcome to ",username);
 
       // If login is successful, redirect to home page
       navigate('/home');
