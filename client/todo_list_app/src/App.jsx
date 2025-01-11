@@ -1,23 +1,31 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
+import { AuthProvider } from './context/AuthContext';
 import Registration from './components/Registration';
+import CompletedTasksPage from './components/CompletedTasksPage';
+import Login from './components/Login';
 import Homepage from './pages/Homepage';
-import CompletedTasks from './components/CompletedTasks';
+import { TaskProvider } from './context/TaskContext';
+import TaskList from './components/TaskList';
 
 
-const App = () => {
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/registration" element={<Registration />} />
-        <Route path="/completed" element={<CompletedTasks />} />
-        <Route path="/home" element={<Homepage />} />
-        <Route path="/" element={<Homepage />} /> {/* Default route */}
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <TaskProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Homepage />} />
+          <Route path="/tasklist" element={<TaskList />} />
+          <Route path="/register" element={<Registration />} />
+          <Route path="/completed" element={<CompletedTasksPage />} />
+        </Routes>
+      </Router>
+      </TaskProvider>
+    </AuthProvider>
   );
-};
+}
 
 export default App;

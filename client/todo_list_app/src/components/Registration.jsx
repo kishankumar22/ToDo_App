@@ -3,44 +3,47 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
 const Registration = () => {
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors }, 
-    watch, 
-    reset 
-  } = useForm();
-  
-  const navigate = useNavigate();
+    const { 
+      register, 
+      handleSubmit, 
+      formState: { errors }, 
+      watch, 
+      reset 
+    } = useForm();
+    
+    const navigate = useNavigate();
 
-  // State to toggle password visibility
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const onSubmit = async (data) => {
-    try {
-      const response = await fetch('http://localhost:3000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        console.log('✅ Registration successful:', result.message);
-        reset();
-        navigate('/login');
-      } else {
-        console.error('❌ Registration failed:', result.error);
+    // State to toggle password visibility
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const onSubmit = async (data) => {
+      try {
+        const response = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+    
+        const result = await response.json();
+    
+        if (response.ok) {
+          console.log('✅ Registration successful:', result.message);
+          reset();
+          navigate('/login');
+        } else {
+          console.error('❌ Registration failed:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ Error:', error.message);
       }
-    } catch (error) {
-      console.error('❌ Error:', error.message);
-    }
-  };
-  
+    };
+    
   return (
+    <>
+    {/* <Header/> */}
+  
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form 
         onSubmit={handleSubmit(onSubmit)} 
@@ -172,7 +175,8 @@ const Registration = () => {
           Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Sign In</Link>
         </p>
       </form>
-    </div>
+    </div>  
+    </>
   );
 };
 
