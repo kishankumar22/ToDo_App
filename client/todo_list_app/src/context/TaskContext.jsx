@@ -1,39 +1,43 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// Create Task Context
+// Create the context
 const TaskContext = createContext();
 
-// Custom Hook
+// Custom hook to use the TaskContext
 export const useTask = () => useContext(TaskContext);
 
-// Task Provider
+// TaskProvider to wrap the app
 export const TaskProvider = ({ children }) => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]); // Shared state for tasks
 
-  const addTask = (task) => {
-    setTasks([...tasks, { id: Date.now(), name: task, completed: false }]);
+  // Add a new task to the list
+  const addTask = (newTask) => {
+    setTasks((prevTasks) => [...prevTasks, newTask]);
   };
 
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
-  };
-
-  const updateTask = (taskId, updatedTask) => {
-    setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
-  };
-  
-  const toggleTaskCompletion = (taskId) => {
-    setTasks(tasks.map((task) => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
-  };
-
-  const updateTaskList = (updatedTasks) => {
+  // Update the entire list of tasks (e.g., after fetching)
+  const updateTasks = (updatedTasks) => {
     setTasks(updatedTasks);
   };
 
+  // Remove a task from the list
+  const removeTask = (taskId) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  // Update a specific task in the list
+  const editTask = (taskId, updatedTitle) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, title: updatedTitle } : task
+      )
+    );
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks,setTasks, addTask, deleteTask, updateTask, toggleTaskCompletion,updateTaskList }}>
+    <TaskContext.Provider
+      value={{ tasks, addTask, updateTasks, removeTask, editTask }}
+    >
       {children}
     </TaskContext.Provider>
   );

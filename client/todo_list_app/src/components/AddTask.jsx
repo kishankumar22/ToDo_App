@@ -10,7 +10,8 @@ const AddTask = () => {
 
   const handleSaveTask = async () => {
     if (!task.trim()) 
-          return; // Prevent saving empty tasks
+      return; // Prevent saving empty tasks
+
     try {
       await postTask(userId, task); // Call the postTask function
       alert("TASK ADDED SUCCESSFULLY");

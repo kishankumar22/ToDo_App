@@ -3,7 +3,7 @@ import db from '../config/db.js';
 
 const router = express.Router();
 
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
+
 
 //1. show uncomplete task of user ✅✅✅✅
 router.get('/taskslist', (req, res) => {
@@ -12,7 +12,7 @@ if (!userId) {
     return res.status(400).json({ error: 'User ID is required' });
   }
   db.query(
-    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ? AND completed = false  order by title desc `,
+    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ?   `,
     [userId],
     (err, results) => {
       if (err) {
@@ -29,7 +29,7 @@ if (!userId) {
   );
 });
 
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
+
 
 //2.show completed  task  ✅✅✅✅
 router.get('/completed', (req, res) => {
@@ -38,7 +38,7 @@ if (!userId) {
     return res.status(400).json({ error: 'User ID is required' });
   }
   db.query(
-    `SELECT id, title, completed FROM tasks WHERE user_id = ? and completed=true `,
+    `SELECT id, title, completed FROM tasks WHERE user_id = ? and completed=false  order by title desc `,
     [userId],
     (err, results) => {
       if (err) {
@@ -55,7 +55,7 @@ if (!userId) {
   );
 });
 
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
+
 
 //3. Add a new task  ✅✅✅✅
 router.post('/addtask', (req, res) => {
@@ -102,7 +102,7 @@ router.delete('/deletetask/:id', (req, res) => {
     });
   });
 
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
+
 
   // 5. update task PUT endpoint to update a task by ID✅✅✅✅
   
@@ -164,8 +164,6 @@ router.put('/updatetask/:id', (req, res) => {
     });
   });
   
-
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
   // 7. update checkbox  task complted✅✅✅✅
   
 router.put('/uncheckboxtask/:id', (req, res) => {
@@ -197,39 +195,6 @@ router.put('/uncheckboxtask/:id', (req, res) => {
   });
 });
 
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
-
-// 8. search implementing by title
-
-router.get('/search', (req, res) => {
-  const userId = req.query.user_id; // Get user_id from query parameters
-  const searchTerm = req.query.title; // Get search term from query parameters
-
-  if (!userId) {
-    return res.status(400).json({ error: 'User  ID is required' });
-  }
-
-  if (!searchTerm) {
-    return res.status(400).json({ error: 'Search term is required' });
-  }
-
-  db.query(
-    `SELECT id, title, completed FROM tasks WHERE user_id = ? AND title LIKE ?`,
-    [userId, `%${searchTerm}%`], // Use LIKE for partial matching
-    (err, results) => {
-      if (err) {
-        console.error('Database query failed:', err.message);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-
-      if (results.length > 0) {
-        return res.json(results); // Send tasks back to the frontend
-      } else {
-        return res.status(404).json({ message: 'No tasks found' });
-      }
-    }
-  );
-});
 
 //1. get all users   all or specific
 

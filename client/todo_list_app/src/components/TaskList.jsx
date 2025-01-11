@@ -1,190 +1,186 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteTask, updateTask, updateCheckboxTask } from '../api/TaskApi'; // Import API functions
+import { useTask } from '../context/TaskContext';
+import { deleteTask, updateTask, updateCheckboxTask } from '../api/TaskApi';
+import axios from 'axios';
 
 const TaskList = () => {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState([]);
-  const [editingTaskId, setEditingTaskId] = useState(null); // Track which task is being edited
-  const [editingTitle, setEditingTitle] = useState(''); // Track the title being edited
-  
+  const { tasks, updateTasks, removeTask, editTask } = useTask(); // Access context
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState('');
 
-  const getTaskData = async () => {
-    const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
-    if (!userId) {
-      alert('User  ID not found. Please log in again.');
-      navigate('/login'); // Redirect to login if user_id is missing
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/taskslist?user_id=${userId}`);
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch tasks');
+  // Fetch tasks on component mount
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        alert('User ID not found. Please log in again.');
+        navigate('/login');
+        return;
       }
-      setTasks(data); // Update state with fetched tasks
-    } catch (error) {
-      console.error('Error fetching tasks:', error.message);
-      alert(error.message || 'An error occurred while fetching tasks');
-    }
-  };
 
-  const handleDeleteTask = async (id) => {
-    const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
-    if (!userId) {
-      alert('User  ID not found. Please log in again.');
-      navigate('/login'); // Redirect to login if user_id is missing
-      return;
-    }
+      try {
+        const response = await axios.get('http://localhost:3000/api/taskslist', {
+          params: { user_id: userId },
+        });
+        updateTasks(response.data); // Update tasks in context
+      } catch (error) {
+        console.error('Error fetching tasks:', error.message);
+        alert('Failed to fetch tasks.');
+      }
+    };
 
+    fetchTasks();
+  }, [navigate, updateTasks]);
+
+  // Delete a task
+  const handleDelete = async (taskId) => {
+    const userId = localStorage.getItem('user_id');
     try {
-      await deleteTask(userId, id); // Call the deleteTask function
-      setTasks(tasks.filter(task => task.id !== id)); // Update local state to remove the deleted task
+      await deleteTask(userId, taskId);
+      removeTask(taskId); // Remove task from context
       alert('Task deleted successfully');
     } catch (error) {
       console.error('Error deleting task:', error.message);
-      alert('Failed to delete task. Please try again.');
+      alert('Failed to delete task.');
     }
   };
 
-  const handleEditTask = (task) => {
-    setEditingTaskId(task.id); // Set the task ID being edited
-    setEditingTitle(task.title); // Set the current title for editing
+  // Edit a task
+  const handleEdit = (task) => {
+    setEditingTaskId(task.id);
+    setEditingTitle(task.title);
   };
 
-  const handleUpdateTask = async (id) => {
+  const handleSaveEdit = async (taskId) => {
     try {
-      await updateTask(id, editingTitle); // Call the updateTask function
-      setTasks(tasks.map(task => (task.id === id ? { ...task, title: editingTitle } : task))); // Update local state
-      setEditingTaskId(null); // Clear editing state
-      setEditingTitle(''); // Clear editing title
+      await updateTask(taskId, editingTitle); // Update task in the backend
+      editTask(taskId, editingTitle); // Update task in context
+      setEditingTaskId(null);
+      setEditingTitle('');
       alert('Task updated successfully');
     } catch (error) {
       console.error('Error updating task:', error.message);
-      alert('Failed to update task. Please try again.');
+      alert('Failed to update task.');
     }
   };
 
-  const handleCheckboxChange = async (id, currentStatus) => {
-    const newCompletedStatus = !currentStatus; // Toggle the completed status
-    const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
-    if (!userId) {
-      alert('User ID not found. Please log in again.');
-      navigate('/login'); // Redirect to login if user_id is missing
-      return;
-    }
-
+  // Mark a task as complete/incomplete
+  const handleCheckboxChange = async (taskId, currentStatus) => {
+    const userId = localStorage.getItem('user_id');
+    const newStatus = !currentStatus; // Toggle the status
+  
     try {
-      await updateCheckboxTask(id, newCompletedStatus); // Update task status in the backend
-
-      // Remove task from current list and refresh tasks
-      setTasks(tasks.filter(task => task.id !== id));
-
-      // Alert message for the update
-      if (newCompletedStatus) {
-        alert('Task moved to Completed Tasks!');
-      } else {
-        alert('Task moved back to Task List.');
-      }
+      const response = await axios.put(`http://localhost:3000/api/uncheckboxtask/${taskId}`, {
+        completed: newStatus, // Send the new status as a boolean
+      });
+      console.log(response.data.message); // Log success message
+      updateTasks(
+        tasks.map((task) =>
+          task.id === taskId ? { ...task, completed: newStatus } : task
+        )
+      );
     } catch (error) {
       console.error('Error updating task status:', error.message);
-      alert('Failed to update task status. Please try again.');
+      alert('Failed to update task status.');
     }
   };
-
-  useEffect(() => {
-    getTaskData(); // Fetch tasks on component mount
-  }, []);
+  
 
   return (
-    <>
-      <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md hover:">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Tasks</h2>
-        {tasks.length > 0 ? (
-          <ul className="space-y-2">
-            {tasks.map((task) => (
-              <li
-                key={task.id}
-                className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
-              >
-                <div className="flex items-center">
+    <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md">
+      <h2 className="text-xl font-bold mb-4">Your Tasks</h2>
+      {tasks.length > 0 ? (
+        <ul className="space-y-2">
+          {tasks.map((task) => (
+            <li
+              key={task.id}
+              className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+            >
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => handleCheckboxChange(task.id, task.completed)}
+                  className="mr-3 w-5 h-5"
+                />
+                {editingTaskId === task.id ? (
                   <input
-                    type="checkbox"
-                    className="mr-3 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={task.completed}
-                    onChange={() => handleCheckboxChange(task.id, task.completed)} // Toggle task status
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    className="border border-gray-300 p-1 rounded"
                   />
-
-
-                  {editingTaskId === task.id ? (
-                    <input
-                      type="text"
-                      value={editingTitle}
-                      onChange={(e) => setEditingTitle(e.target.value)} // Update title as user types
-                      className="border border-gray-300 rounded p-1"
-                    />
-                  ) : (
-                    <p className={`${task.completed ? 'line-through text-gray-500' : ''}`}>
-                      {task.title}
-                    </p>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-           
-                  {editingTaskId === task.id ? (
-                    <button
-                      onClick={() => handleUpdateTask(task.id)} // Save updated title
-                      className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                    >
-                      Save
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEditTask(task)} // Enable editing
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteTask(task.id)} // Delete task
-                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                ) : (
+                  <span
+                    className={`${
+                      task.completed ? 'line-through text-gray-500' : ''
+                    }`}
                   >
-                    Delete
+                    {task.title}
+                  </span>
+                )}
+              </div>
+              <div className="flex space-x-2">
+                {editingTaskId === task.id ? (
+                  <button
+                    onClick={() => handleSaveEdit(task.id)}
+                    className={`px-3 py-1 rounded ${
+                      task.completed
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                    disabled={task.completed} // Disable if task is completed
+                  >
+                    Save
                   </button>
-                  {/* date  */}
-                  {/* <button
-                  onClick={() => { alert("Date: " + task.date); }} // Show the date in the alert
-                  className="bg-green-200 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                ) : (
+                  <button
+                    onClick={() => handleEdit(task)}
+                    className={`px-3 py-1 rounded ${
+                      task.completed
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                    disabled={task.completed} // Disable if task is completed
+                  >
+                    Edit
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDelete(task.id)}
+                  className={`px-3 py-1 rounded ${
+                    task.completed
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-red-500 text-white hover:bg-red-600'
+                  }`}
+                  disabled={task.completed} // Disable if task is completed
                 >
-                  {task.date}
-                </button> */}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-600">No tasks available</p>
-        )}
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
-          <button
-            onClick={() => navigate('/tasklist')}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            Task List
-          </button>
-          <button
-            onClick={() => navigate('/completed')}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            View Completed Tasks
-          </button>
-        </div>
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">No tasks available</p>
+      )}
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-6">
+        <button
+          onClick={() => navigate('/tasklist')}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+        >
+          Task List
+        </button>
+        <button
+          onClick={() => navigate('/completed')}
+          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+        >
+          View Completed Tasks
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 

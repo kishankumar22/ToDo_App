@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Homepage from './pages/Homepage';
 import { TaskProvider } from './context/TaskContext';
 import TaskList from './components/TaskList';
+import AddTask from './components/AddTask';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Homepage />} />
+          <Route path="/addtask" element={<AddTask />} />
           <Route path="/tasklist" element={<TaskList />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/completed" element={<CompletedTasksPage />} />
