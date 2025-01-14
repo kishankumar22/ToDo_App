@@ -6,7 +6,7 @@ import CompletedTasksPage from './components/CompletedTasksPage';
 import Login from './components/Login';
 import Homepage from './pages/Homepage';
 import { TaskProvider } from './context/TaskContext';
-import TaskList from './components/TaskList';
+import TodayTask from './components/TodayTask';
 import AddTask from './components/AddTask';
 
 
@@ -20,7 +20,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Homepage />} />
           <Route path="/addtask" element={<AddTask />} />
-          <Route path="/tasklist" element={<TaskList />} />
+          <Route path="/todaytask" element={<TodayTask />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/completed" element={<CompletedTasksPage />} />
         </Routes>

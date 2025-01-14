@@ -8,7 +8,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm('You are already logged in. Do you want to logout from this device?');
+    const confirmLogout = window.confirm('Do you want to logout from this device?');
     if (confirmLogout) {
       logout();
       // alert('You have been logged out successfully!');

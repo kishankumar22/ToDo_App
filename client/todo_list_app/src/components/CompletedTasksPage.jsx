@@ -5,9 +5,9 @@ import { deleteTask, updateUnCheckboxTask } from '../api/TaskApi'; // Import upd
 const CompletedTasksPage = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
-
+  
   const getTaskData = async () => {
-    const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
+  const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
 
     if (!userId) {
       alert('User ID not found. Please log in again.');

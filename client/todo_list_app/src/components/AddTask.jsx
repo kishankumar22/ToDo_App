@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2'
+import './../App.css'
 import { useTask } from '../context/TaskContext';
 import { postTask } from '../api/TaskApi'; // Import the postTask function
 
@@ -9,18 +11,37 @@ const AddTask = () => {
   const userId = localStorage.getItem('user_id'); // Get user ID from local storage
 
   const handleSaveTask = async () => {
-    if (!task.trim()) 
+    if (!task.trim()==="") 
       return; // Prevent saving empty tasks
 
     try {
       await postTask(userId, task); // Call the postTask function
-      alert("TASK ADDED SUCCESSFULLY");
+      // alert("TASK ADDED SUCCESSFULLY");
+      await Swal.fire({
+              title: 'Success!',
+              text: 'Task added successfully',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
       setTask(''); // Clear the input field
       setShowInput(false); // Hide the input field
       addTask(task); // Optionally call addTask if you want to update local state
     } catch (error) {
       console.error('Error adding task:', error);
-      alert('Failed to add task. Please try again.');
+      // alert('Failed to add task. Please try again.');
+      await Swal.fire({
+        title: 'Error!',
+        text: 'Failed to add task. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        width: '400px', // Modal width
+        customClass: {
+          popup: 'my-popup', // Custom popup styling
+          title: 'my-title', // Custom title styling
+          content: 'my-content', // Custom content styling
+      },
+    });
+    
     }
   };
 

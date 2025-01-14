@@ -5,14 +5,16 @@ const router = express.Router();
 
 
 
-//1. show uncomplete task of user ✅✅✅✅
-router.get('/taskslist', (req, res) => {
+//1. show uncomplete task of user ✅✅✅✅ days
+
+router.get('/todaytask', (req, res) => {
   const userId = req.query.user_id; // Get user_id from query parameters
 if (!userId) {
     return res.status(400).json({ error: 'User ID is required' });
   }
   db.query(
-    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ?   `,
+    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ? 
+          and DATE(created_at) = CURDATE(); `,
     [userId],
     (err, results) => {
       if (err) {
@@ -29,6 +31,57 @@ if (!userId) {
   );
 });
 
+// todays task displays  yesterday
+
+router.get('/yestask', (req, res) => {
+  const userId = req.query.user_id; // Get user_id from query parameters
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+  db.query(
+    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
+     FROM tasks WHERE user_id = ?  AND DATE(created_at) = CURDATE() - INTERVAL 1 DAY; `,
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Database query failed:', err.message);
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+
+      if (results.length > 0) {
+        return res.json(results); // Send tasks back to the frontend
+      } else {
+        return res.status(404).json({ message: 'No tasks found' });
+      }
+    }
+  );
+});
+
+// task displays of 48 hours  
+
+router.get('/lasttwodays', (req, res) => {
+  const userId = req.query.user_id; // Get user_id from query parameters
+if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+  db.query(
+    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
+    FROM tasks  WHERE user_id = ? AND DATE(created_at) = CURDATE() - INTERVAL 2 DAY; `,
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Database query failed:', err.message);
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+
+      if (results.length > 0) {
+        return res.json(results); // Send tasks back to the frontend
+      } else {
+        return res.status(404).json({ message: 'No tasks found' });
+      }
+    }
+  );
+});
 
 
 //2.show completed  task  ✅✅✅✅

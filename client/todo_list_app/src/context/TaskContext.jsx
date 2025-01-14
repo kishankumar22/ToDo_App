@@ -9,6 +9,7 @@ export const useTask = () => useContext(TaskContext);
 // TaskProvider to wrap the app
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]); // Shared state for tasks
+  
 
   // Add a new task to the list
   const addTask = (newTask) => {
@@ -27,6 +28,13 @@ export const TaskProvider = ({ children }) => {
 
   // Update a specific task in the list
   const editTask = (taskId, updatedTitle) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, title: updatedTitle } : task
+      )
+    );
+  };
+  const editTaskyes = (taskId, updatedTitle) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === taskId ? { ...task, title: updatedTitle } : task
