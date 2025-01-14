@@ -40,7 +40,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gray-100 h-16 flex items-center px-4 shadow-md">
+    <header className="bg-gray-100 h-12 flex items-center px-4 shadow-md">
       <div className="flex justify-between w-full max-w-7xl mx-auto items-center">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold text-blue-600">
@@ -57,14 +57,14 @@ const Header = () => {
         </div> */}
 
         {/* Buttons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           {/* Dynamic Login/Logout */}
           {isLoggedIn ? (
             <>
               <p className="hidden sm:block capitalize text-sm font-semibold">{user?.username || 'User'}</p>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600"
               >
                 Logout
               </button>

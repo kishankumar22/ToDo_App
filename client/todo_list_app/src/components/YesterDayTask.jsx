@@ -13,7 +13,7 @@ const YesterDayTask = () => {
     const userId = localStorage.getItem('user_id');
 
     if (!userId) {
-      alert('User ID not found. Please log in again.');
+      alert('User  ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -21,9 +21,6 @@ const YesterDayTask = () => {
     try {
       const response = await fetch(`http://localhost:3000/api/yestask?user_id=${userId}`);
       const data = await response.json();
-      console.log(data);
-      const list= [{data}]      
-      console.log(list)
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch tasks');
       }
@@ -37,7 +34,7 @@ const YesterDayTask = () => {
   const handleDeleteTask = async (id) => {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      alert('User ID not found. Please log in again.');
+      alert('User  ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -98,85 +95,125 @@ const YesterDayTask = () => {
     getTaskData();
   }, []);
 
+  // Separate completed and uncompleted tasks
+  const completedTasks = tasks.filter(task => task.completed);
+  const uncompletedTasks = tasks.filter(task => !task.completed);
+
   return (
     <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">yesterday's Tasks</h1>
-      {tasks.length > 0 ? (
-        <ul className="space-y-2">
-          {tasks.map((task) => (
-            <li
-              key={task.id}
-              className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
-            >
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="mr-3 w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  checked={task.completed}
-                  onChange={() => handleCheckboxChange(task.id, task.completed)}
-                />
-                {editingTaskId === task.id ? (
+      <h1 className="text-2xl font-bold mb-4 text-center">Yesterday's Tasks</h1>
+
+      {/* Completed Tasks */}
+      {completedTasks.length > 0 && (
+        <div >
+          {/* <h2 className="font-semibold m-2">Completed Tasks</h2> */}
+          <ul className="space-y-2">
+            {completedTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+              >
+                <div className="flex items-center">
                   <input
-                    type="text"
-                    value={editingTitle}
-                    onChange={(e) => setEditingTitle(e.target.value)}
-                    className="border border-gray-300 rounded px-2 py-1 w-44"
+                    type="checkbox"
+                    className="mr-3 w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    checked={task .completed}
+                    onChange={() => handleCheckboxChange(task.id, task.completed)}
                   />
-                ) : (
-                  <p className={`${task.completed ? 'line-through text-gray-500' : ''}`}>
-                    {task.title}
-                  </p>
-                )}
-              </div>
-              <div className="flex space-x-2">
-                {editingTaskId === task.id ? (
+                  <p className="line-through text-gray-500">{task.title}</p>
+                </div>
+                <div className="flex space-x-2">
+                <button
+                      onClick={() => handleEdit(task)}
+                      className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed text-gray"
+                      disabled
+                    >
+                      Edit
+                    </button>
+                  
                   <button
-                    onClick={() => handleSaveEdit(task.id)}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                    onClick={() => handleDelete(task.id)}
+                    className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
+                    disabled
                   >
-                    Save
+                    Delete
                   </button>
-                ) : (
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Uncompleted Tasks */}
+      {uncompletedTasks.length > 0 ? (
+        <div className='mt-2'>
+          {/* <h2 className="font-semibold m-2">Uncompleted Tasks</h2> */}
+          <ul className="space-y-2">
+            {uncompletedTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+              >
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="mr-3 w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    checked={task.completed}
+                    onChange={() => handleCheckboxChange(task.id, task.completed)}
+                  />
+                  {editingTaskId === task.id ? (
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-44"
+                    />
+                  ) : (
+                    <p>{task.title}</p>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  {editingTaskId === task.id ? (
+                    <button
+                      onClick={() => handleSaveEdit(task.id)}
+                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleEdit(task)}
+                      className={`px-3 py-1 rounded ${
+                        task.completed
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                      disabled={task.completed}
+                    >
+                      Edit
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleEdit(task)}
+                    onClick={() => handleDeleteTask(task.id)}
                     className={`px-3 py-1 rounded ${
                       task.completed
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                        : 'bg-red-500 text-white hover:bg-red-600'
                     }`}
                     disabled={task.completed}
                   >
-                    Edit
+                    Delete
                   </button>
-                )}
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className={`px-3 py-1 rounded ${
-                    task.completed
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-red-500 text-white hover:bg-red-600'
-                  }`}
-                  disabled={task.completed}
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
-        <p className="text-gray-600">No tasks available</p>
+        <p className="text-gray-600 ">No uncompleted tasks available</p>
       )}
-
-      {/* <div className="flex justify-center mt-6">
-        <button
-          onClick={() => navigate('/')}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200"
-        >
-          Back to Home
-        </button>
-      </div> */}
-    </div>  
+    </div>
   );
 };
 

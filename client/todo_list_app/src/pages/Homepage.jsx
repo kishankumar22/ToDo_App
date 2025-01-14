@@ -17,10 +17,10 @@ const Homepage = () => {
         {user ? (
           // If user is logged in
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 capitalize mb-6">
+            {/* <h1 className="text-3xl font-bold text-gray-800 capitalize mb-6">
               Welcome, {user.username}!
-            </h1>
-            <div className="mb-8">
+            </h1> */}
+            <div className="mb-4">
               <AddTask />
             </div>
 

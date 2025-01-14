@@ -14,7 +14,7 @@ if (!userId) {
   }
   db.query(
     `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ? 
-          and DATE(created_at) = CURDATE(); `,
+          and DATE(created_at) = CURDATE() order by title desc`,
     [userId],
     (err, results) => {
       if (err) {
@@ -84,29 +84,29 @@ if (!userId) {
 });
 
 
-//2.show completed  task  ✅✅✅✅
-router.get('/completed', (req, res) => {
-  const userId = req.query.user_id; // Get user_id from query parameters
-if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  db.query(
-    `SELECT id, title, completed FROM tasks WHERE user_id = ? and completed=false  order by title desc `,
-    [userId],
-    (err, results) => {
-      if (err) {
-        console.error('Database query failed:', err.message);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
+// //2.show completed  task  ✅✅✅✅
+// router.get('/completed', (req, res) => {
+//   const userId = req.query.user_id; // Get user_id from query parameters
+// if (!userId) {
+//     return res.status(400).json({ error: 'User ID is required' });
+//   }
+//   db.query(
+//     `SELECT id, title, completed FROM tasks WHERE user_id = ? and completed=false  order by title desc `,
+//     [userId],
+//     (err, results) => {
+//       if (err) {
+//         console.error('Database query failed:', err.message);
+//         return res.status(500).json({ error: 'Database query failed' });
+//       }
 
-      if (results.length > 0) {
-        return res.json(results); // Send tasks back to the frontend
-      } else {
-        return res.status(404).json({ message: 'No tasks found' });
-      }
-    }
-  );
-});
+//       if (results.length > 0) {
+//         return res.json(results); // Send tasks back to the frontend
+//       } else {
+//         return res.status(404).json({ message: 'No tasks found' });
+//       }
+//     }
+//   );
+// });
 
 
 
@@ -128,8 +128,6 @@ router.post('/addtask', (req, res) => {
   });
 });
 
-
-//✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
 
 //4. DELETE endpoint to remove a task by ID✅✅✅✅
 router.delete('/deletetask/:id', (req, res) => {
@@ -229,8 +227,7 @@ router.put('/uncheckboxtask/:id', (req, res) => {
 
   if (completed === undefined) {
     return res.status(400).json({ error: 'Completed status is required' });
-  }
-  
+  }  
 
   const query = 'UPDATE tasks SET completed = ? WHERE id = ?';
   db.query(query, [completed, taskId], (err, results) => {
@@ -293,9 +290,5 @@ router.get('/users/:userId', (req, res) => {
     res.json(results);
   });
 });
-
-
-
-
 
 export default router;

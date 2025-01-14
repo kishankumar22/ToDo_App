@@ -11,8 +11,11 @@ const AddTask = () => {
   // Get user ID from local storage
 
   const handleSaveTask = async () => {
-    if (task.trim() === "") 
+    if (task.trim() === "") {
+       await Swal.fire('Warning!', 'Please enter some text.', 'warning'); // Alert for empty task
       return; // Prevent saving empty tasks
+    }
+     
 
     const userId = localStorage.getItem('user_id');
     if (!userId) {
@@ -45,12 +48,12 @@ const AddTask = () => {
     }
 };
   return (
-    <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md">
-      <h2 className="text-2xl font-bold mb-4">Add Your Task</h2>
+    <div className="max-w-lg mx-auto h-12 rounded-md">
+      {/* <span className="text-xl font-bold mb-4 p-2 float-left">Add Your Task :</span> */}
       {!showInput && (
         <button
           onClick={() => setShowInput(true)}
-          className="block w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          className="block  bg-blue-500 text-white px-4 py-2 m-auto rounded-md border-2  hover:bg-blue-600"
         >
           Add Task
         </button>
