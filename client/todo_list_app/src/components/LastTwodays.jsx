@@ -21,6 +21,8 @@ const LastTwoDays = () => {
     try {
       const response = await fetch(`http://localhost:3000/api/lasttwodays?user_id=${userId}`);
       const data = await response.json();
+      // console.log(data);
+      
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch tasks');

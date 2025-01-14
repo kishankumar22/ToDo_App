@@ -8,43 +8,42 @@ const AddTask = () => {
   const { addTask } = useTask(); // Assuming addTask is a context function
   const [task, setTask] = useState('');
   const [showInput, setShowInput] = useState(false);
-  const userId = localStorage.getItem('user_id'); // Get user ID from local storage
+  // Get user ID from local storage
 
   const handleSaveTask = async () => {
-    if (!task.trim()==="") 
+    if (task.trim() === "") 
       return; // Prevent saving empty tasks
 
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      alert('User  ID not found. Please log in again.');
+      return;
+    }
+
     try {
+      // Fetch existing tasks to check their completion status
+      const response = await fetch(`http://localhost:3000/api/lasttwodays?user_id=${userId}`);
+      const data = await response.json();
+
+      // Check if all tasks are completed
+      const allTasksCompleted = data.every(task => task.completed);
+
+      if (!allTasksCompleted) {
+        await Swal.fire('Warning!', 'You cannot add a new task until all existing tasks are completed.', 'warning');
+        return; // Exit the function if not all tasks are completed
+      }
+
+      // If all tasks are completed, proceed to add the new task
       await postTask(userId, task); // Call the postTask function
-      // alert("TASK ADDED SUCCESSFULLY");
-      await Swal.fire({
-              title: 'Success!',
-              text: 'Task added successfully',
-              icon: 'success',
-              confirmButtonText: 'OK'
-            });
+      await Swal.fire('Success!', 'Task added successfully', 'success');
       setTask(''); // Clear the input field
       setShowInput(false); // Hide the input field
       addTask(task); // Optionally call addTask if you want to update local state
     } catch (error) {
       console.error('Error adding task:', error);
-      // alert('Failed to add task. Please try again.');
-      await Swal.fire({
-        title: 'Error!',
-        text: 'Failed to add task. Please try again.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-        width: '400px', // Modal width
-        customClass: {
-          popup: 'my-popup', // Custom popup styling
-          title: 'my-title', // Custom title styling
-          content: 'my-content', // Custom content styling
-      },
-    });
-    
+      await Swal.fire('Error!', 'Failed to add task. Please try again.', 'error');
     }
-  };
-
+};
   return (
     <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md">
       <h2 className="text-2xl font-bold mb-4">Add Your Task</h2>
