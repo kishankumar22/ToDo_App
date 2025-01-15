@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
       <IdleTimerProvider
-        timeout={10 * 50 * 1000} // 10 minutes in milliseconds
+        timeout={10 * 60 * 1000} // 10 minutes in milliseconds
         onIdle={logout} // Call logout when idle
         debounce={500} // Debounce time for events
       >

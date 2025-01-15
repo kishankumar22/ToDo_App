@@ -13,7 +13,7 @@ const YesterDayTask = () => {
     const userId = localStorage.getItem('user_id');
 
     if (!userId) {
-      alert('User  ID not found. Please log in again.');
+      alert('User ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -34,7 +34,7 @@ const YesterDayTask = () => {
   const handleDeleteTask = async (id) => {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      alert('User  ID not found. Please log in again.');
+      alert('User ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -72,6 +72,17 @@ const YesterDayTask = () => {
   };
 
   const handleCheckboxChange = async (taskId, currentStatus) => {
+    if (editingTaskId !== null) {
+      // If task is in editing mode, show a warning alert
+      await Swal.fire({
+        title: 'Warning!',
+        text: 'Please save the task before marking it as complete/incomplete.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return; // Exit the function to prevent checkbox change
+    }
+
     const newStatus = !currentStatus;
     try {
       await updateCheckboxTask(taskId, newStatus);
@@ -80,6 +91,7 @@ const YesterDayTask = () => {
           task.id === taskId ? { ...task, completed: newStatus } : task
         )
       );
+
       if (newStatus) {
         Swal.fire('Good job!', 'You completed the task!', 'success');
       } else {
@@ -96,8 +108,8 @@ const YesterDayTask = () => {
   }, []);
 
   // Separate completed and uncompleted tasks
-  const completedTasks = tasks.filter(task => task.completed);
-  const uncompletedTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter((task) => task.completed);
+  const uncompletedTasks = tasks.filter((task) => !task.completed);
 
   return (
     <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md shadow-lg">
@@ -105,8 +117,7 @@ const YesterDayTask = () => {
 
       {/* Completed Tasks */}
       {completedTasks.length > 0 && (
-        <div >
-          {/* <h2 className="font-semibold m-2">Completed Tasks</h2> */}
+        <div>
           <ul className="space-y-2">
             {completedTasks.map((task) => (
               <li
@@ -117,20 +128,19 @@ const YesterDayTask = () => {
                   <input
                     type="checkbox"
                     className="mr-3 w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={task .completed}
+                    checked={task.completed}
                     onChange={() => handleCheckboxChange(task.id, task.completed)}
                   />
                   <p className="line-through text-gray-500">{task.title}</p>
                 </div>
                 <div className="flex space-x-2">
-                <button
-                      onClick={() => handleEdit(task)}
-                      className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed text-gray"
-                      disabled
-                    >
-                      Edit
-                    </button>
-                  
+                  <button
+                    className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
+                    disabled
+                  >
+                    Edit
+                  </button>
+
                   <button
                     onClick={() => handleDeleteTask(task.id)}
                     className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -147,8 +157,7 @@ const YesterDayTask = () => {
 
       {/* Uncompleted Tasks */}
       {uncompletedTasks.length > 0 ? (
-        <div className='mt-2'>
-          {/* <h2 className="font-semibold m-2">Uncompleted Tasks</h2> */}
+        <div className="mt-2">
           <ul className="space-y-2">
             {uncompletedTasks.map((task) => (
               <li
@@ -211,7 +220,7 @@ const YesterDayTask = () => {
           </ul>
         </div>
       ) : (
-        <p className="text-gray-600 ">No uncompleted tasks available</p>
+        <p className="text-gray-500 text-center mt-2.5">No uncompleted tasks available</p>
       )}
     </div>
   );

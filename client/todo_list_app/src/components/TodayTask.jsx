@@ -17,7 +17,7 @@ const TodayTask = () => {
     const fetchTasks = async () => {
       const userId = localStorage.getItem('user_id');
       if (!userId) {
-        alert('User  ID not found. Please log in again.');
+        alert('User ID not found. Please log in again.');
         navigate('/login');
         return;
       }
@@ -27,11 +27,8 @@ const TodayTask = () => {
           params: { user_id: userId },
         });
         updateTasks(response.data); // Update tasks in context
-        // console.log(response.data);
-        
       } catch (error) {
         console.error('Error fetching tasks:', error.message);
-        // alert('Failed to fetch tasks.');
       }
     };
 
@@ -47,7 +44,7 @@ const TodayTask = () => {
         title: 'Success!',
         text: 'Task deleted successfully',
         icon: 'success',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
     } catch (error) {
       console.error('Error deleting task:', error.message);
@@ -55,12 +52,11 @@ const TodayTask = () => {
         title: 'Error!',
         text: 'Failed to delete task.',
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
     }
   };
 
-  // Edit a task
   const handleEdit = (task) => {
     setEditingTaskId(task.id);
     setEditingTitle(task.title);
@@ -72,25 +68,26 @@ const TodayTask = () => {
       editTask(taskId, editingTitle); // Update task in context
       setEditingTaskId(null);
       setEditingTitle('');
-      await Swal.fire({
-        title: 'Success!',
-        text: 'Task updated successfully',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      });
+      Swal.fire('Success!', 'Task updated successfully.', 'success');
     } catch (error) {
       console.error('Error updating task:', error.message);
-      await Swal.fire({
-        title: 'Error!',
-        text: 'Failed to update task.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+      Swal.fire('Error!', 'Failed to update task.', 'error');
     }
   };
 
-  // Mark a task as complete/incomplete
   const handleCheckboxChange = async (taskId, currentStatus) => {
+    // Check if the task is being edited
+    if (editingTaskId !== null) {
+      // If a task is being edited, alert the user to save it first
+      await Swal.fire({
+        title: 'Warning!',
+        text: 'Please save the task before marking it as complete/incomplete.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return; // Don't proceed with the checkbox change
+    }
+
     const newStatus = !currentStatus;
     try {
       await updateCheckboxTask(taskId, newStatus); // Update task status in the backend
@@ -99,6 +96,7 @@ const TodayTask = () => {
           task.id === taskId ? { ...task, completed: newStatus } : task
         )
       );
+
       if (newStatus) {
         Swal.fire('Good job!', 'You completed the task!', 'success');
       } else {
@@ -106,23 +104,24 @@ const TodayTask = () => {
       }
     } catch (error) {
       console.error('Error updating task status:', error.message);
-      alert('Failed to update task status.');
+      Swal.fire('Error!', 'Failed to update task status.', 'error');
     }
   };
 
-  // Separate completed and uncompleted tasks
-  const completedTasks = tasks.filter(task => task.completed);
-  const uncompletedTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter((task) => task.completed);
+  const uncompletedTasks = tasks.filter((task) => !task.completed);
 
   return (
     <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md">
       <h2 className="text-2xl font-bold mb-4 text-center">Today Tasks</h2>
       {completedTasks.length > 0 && (
         <div>
-          {/* <h3 className="font-semibold m-2">Completed Tasks</h3> */}
           <ul className="space-y-2">
             {completedTasks.map((task) => (
-              <li key={task.id} className="flex items-center justify-between bg-white p-3 rounded -md shadow-sm">
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+              >
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -132,20 +131,35 @@ const TodayTask = () => {
                   />
                   <span className="line-through text-gray-500">{task.title}</span>
                 </div>
-                <div className="flex space-x-2">  
-
-                  <button
+                <div className="flex space-x-2">
+                  {editingTaskId === task.id ? (
+                    <button
+                      onClick={() => handleSaveEdit(task.id)}
+                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
                       onClick={() => handleEdit(task)}
-                      className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed text-gray"
-                      disabled
+                      className={`px-3 py-1 rounded ${
+                        task.completed
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                      disabled={task.completed}
                     >
                       Edit
                     </button>
-                  
+                  )}
                   <button
                     onClick={() => handleDelete(task.id)}
-                    className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
-                    disabled
+                    className={`px-3 py-1 rounded ${
+                      task.completed
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-red-500 text-white hover:bg-red-600'
+                    }`}
+                    disabled={task.completed}
                   >
                     Delete
                   </button>
@@ -156,11 +170,13 @@ const TodayTask = () => {
         </div>
       )}
       {uncompletedTasks.length > 0 ? (
-        <div className='mt-2'>
-          {/* <h3 className="font-semibold m-2">Uncompleted Tasks</h3> */}
+        <div className="mt-2">
           <ul className="space-y-2">
             {uncompletedTasks.map((task) => (
-              <li key={task.id} className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm">
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+              >
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -206,7 +222,7 @@ const TodayTask = () => {
           </ul>
         </div>
       ) : (
-        <p className="text-gray-500">No uncompleted tasks available</p>
+        <p className="text-gray-500 text-center mt-2.5">No uncompleted tasks available</p>
       )}
     </div>
   );

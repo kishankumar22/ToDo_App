@@ -51,7 +51,7 @@ const AddTask = () => {
       {!showInput && (
         <button
           onClick={() => setShowInput(true)}
-          className="block  bg-blue-500 text-white px-4 py-2 m-auto rounded-md border-2  hover:bg-blue-600"
+          className="block  bg-blue-500 text-white px-4 py-2 m-auto mt-2 rounded-md border-2  hover:bg-blue-600"
         >
           Add Task
         </button>
@@ -70,6 +70,12 @@ const AddTask = () => {
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
           >
             Save
+          </button>
+          <button
+           onClick={() => setShowInput(false)}
+            className="bg-red-500 text-white px-4 py-2 rounded-md "
+          >
+            cancel
           </button>
         </div>
       )}

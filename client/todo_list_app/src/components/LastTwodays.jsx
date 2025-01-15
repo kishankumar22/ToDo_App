@@ -13,7 +13,7 @@ const LastTwoDays = () => {
     const userId = localStorage.getItem('user_id');
 
     if (!userId) {
-      alert('User  ID not found. Please log in again.');
+      alert('User ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -35,7 +35,7 @@ const LastTwoDays = () => {
   const handleDeleteTask = async (id) => {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      alert('User  ID not found. Please log in again.');
+      alert('User ID not found. Please log in again.');
       navigate('/login');
       return;
     }
@@ -73,6 +73,17 @@ const LastTwoDays = () => {
   };
 
   const handleCheckboxChange = async (taskId, currentStatus) => {
+    if (editingTaskId !== null) {
+      // Task is being edited, show an alert to save it first
+      Swal.fire({
+        title: 'Save your changes!',
+        text: 'Please save the task before changing its status.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return; // Prevent checkbox change if editing
+    }
+
     const newStatus = !currentStatus;
     try {
       await updateCheckboxTask(taskId, newStatus);
@@ -81,6 +92,7 @@ const LastTwoDays = () => {
           task.id === taskId ? { ...task, completed: newStatus } : task
         )
       );
+
       if (newStatus) {
         Swal.fire('Good job!', 'You completed the task!', 'success');
       } else {
@@ -97,8 +109,8 @@ const LastTwoDays = () => {
   }, []);
 
   // Separate completed and uncompleted tasks
-  const completedTasks = tasks.filter(task => task.completed);
-  const uncompletedTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter((task) => task.completed);
+  const uncompletedTasks = tasks.filter((task) => !task.completed);
 
   return (
     <div className="max-w-lg mx-auto mt-5 p-5 bg-gray-200 rounded-md shadow-lg">
@@ -107,7 +119,6 @@ const LastTwoDays = () => {
       {/* Completed Tasks */}
       {completedTasks.length > 0 && (
         <div>
-          {/* <h2 className="font-semibold">Completed Tasks</h2> */}
           <ul className="space-y-2">
             {completedTasks.map((task) => (
               <li
@@ -118,20 +129,18 @@ const LastTwoDays = () => {
                   <input
                     type="checkbox"
                     className="mr-3 w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={task .completed}
+                    checked={task.completed}
                     onChange={() => handleCheckboxChange(task.id, task.completed)}
                   />
                   <p className="line-through text-gray-500">{task.title}</p>
                 </div>
                 <div className="flex space-x-2">
-                <button
-                      onClick={() => handleEdit(task)}
-                      className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed text-gray"
-                      disabled
-                    >
-                      Edit
-                    </button>
-                  
+                  <button
+                    className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
+                    disabled
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDeleteTask(task.id)}
                     className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -148,8 +157,7 @@ const LastTwoDays = () => {
 
       {/* Uncompleted Tasks */}
       {uncompletedTasks.length > 0 ? (
-        <div className='mt-2'>
-          {/* <h2 className="font-semibold mt-4">Uncompleted Tasks</h2> */}
+        <div className="mt-2">
           <ul className="space-y-2">
             {uncompletedTasks.map((task) => (
               <li
@@ -199,7 +207,7 @@ const LastTwoDays = () => {
                     onClick={() => handleDeleteTask(task.id)}
                     className={`px-3 py-1 rounded ${
                       task.completed
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed rounded-md'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-red-500 text-white hover:bg-red-600'
                     }`}
                     disabled={task.completed}
@@ -212,7 +220,7 @@ const LastTwoDays = () => {
           </ul>
         </div>
       ) : (
-        <p className="text-gray-600">No uncompleted tasks available</p>
+        <p className="text-gray-500 text-center mt-2.5">No uncompleted tasks available</p>
       )}
     </div>
   );

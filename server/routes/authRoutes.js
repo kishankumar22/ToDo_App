@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
       const token = jwt.sign(
         { userId: user.id, username: user.name }, // Payload
         'todotask', // Replace with your secret key
-        { expiresIn: '10m' } // Token expiration time
+        { expiresIn: '1' } // Token expiration time
       );
 
       res.status(200).json({
