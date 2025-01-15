@@ -27,10 +27,10 @@ const Login = () => {
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
-      localStorage.setItem('user_id', JSON.stringify(data.userId));
+      localStorage.setItem('user_id', JSON.stringify(data.userId));//set user id
       // Update AuthContext
       login(data.token, { username: data.username });
-      alert(`Welcome, ${data.username}!`);
+      // alert(`Welcome, ${data.username}!`);
       navigate('/'); // Redirect to home
     } catch (err) {
       setError(err.message);

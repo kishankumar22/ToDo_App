@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { IdleTimerProvider } from 'react-idle-timer';
 
-// Create Auth Context
 const AuthContext = createContext();
 
-// Custom hook to use Auth Context
 export const useAuth = () => useContext(AuthContext);
 
-// AuthProvider Component
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Check for existing login session on component mount
+  // Logout Function
+  const logout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setUser(null);
+    alert('Session expired due to inactivity.');
+    window.location.href = '/'; // Redirect to home page
+  };
+
+  // Initialize on mount
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('user');
@@ -29,18 +37,15 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  // Logout Function
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('user_id');
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
-      {children}
+      <IdleTimerProvider
+        timeout={10 * 50 * 1000} // 10 minutes in milliseconds
+        onIdle={logout} // Call logout when idle
+        debounce={500} // Debounce time for events
+      >
+        {children}
+      </IdleTimerProvider>
     </AuthContext.Provider>
   );
 };

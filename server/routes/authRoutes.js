@@ -1,3 +1,4 @@
+// auth.js (or your routes file)
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; // Import the JWT library
@@ -31,11 +32,11 @@ router.post('/login', async (req, res) => {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // Generate JWT
+      // Generate JWT with 10 minutes expiration
       const token = jwt.sign(
         { userId: user.id, username: user.name }, // Payload
-        'your-secret-key', // Replace with your secret key
-        { expiresIn: '1h' } // Token expiration time
+        'todotask', // Replace with your secret key
+        { expiresIn: '10m' } // Token expiration time
       );
 
       res.status(200).json({

@@ -6,22 +6,20 @@ import { postTask } from '../api/TaskApi'; // Import the postTask function
 
 const AddTask = () => {
   const { addTask } = useTask(); // Assuming addTask is a context function
-  const [task, setTask] = useState('');
-  const [showInput, setShowInput] = useState(false);
+  const [task, setTask] = useState('');//for storing task  by task
+  const [showInput, setShowInput] = useState(false); // for input hide / show 
   // Get user ID from local storage
 
   const handleSaveTask = async () => {
-    if (task.trim() === "") {
-       await Swal.fire('Warning!', 'Please enter some text.', 'warning'); // Alert for empty task
-      return; // Prevent saving empty tasks
-    }
-     
-
-    const userId = localStorage.getItem('user_id');
+  const userId = localStorage.getItem('user_id');
     if (!userId) {
-      alert('User  ID not found. Please log in again.');
+      alert('User  does not found. Please log in again.');
       return;
     }
+    if (task.trim() === "") {
+      await Swal.fire('Warning!', 'Please enter some text.', 'warning'); // Alert for empty task
+     return; // Prevent saving empty tasks
+    }   
 
     try {
       // Fetch existing tasks to check their completion status

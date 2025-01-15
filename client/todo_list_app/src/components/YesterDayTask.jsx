@@ -132,7 +132,7 @@ const YesterDayTask = () => {
                     </button>
                   
                   <button
-                    onClick={() => handleDelete(task.id)}
+                    onClick={() => handleDeleteTask(task.id)}
                     className="px-3 py-1 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
                     disabled
                   >

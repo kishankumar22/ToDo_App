@@ -23,13 +23,15 @@ const TodayTask = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:3000/api/TodayTask', {
+        const response = await axios.get('http://localhost:3000/api/todaytask', {
           params: { user_id: userId },
         });
         updateTasks(response.data); // Update tasks in context
+        // console.log(response.data);
+        
       } catch (error) {
         console.error('Error fetching tasks:', error.message);
-        alert('Failed to fetch tasks.');
+        // alert('Failed to fetch tasks.');
       }
     };
 

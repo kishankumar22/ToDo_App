@@ -15,29 +15,8 @@ const Header = () => {
       navigate('/');
     }
   };
-  // search task
-  const searchTask = async () => {
-    const userId = localStorage.getItem('user_id'); // Get user_id from localStorage
-    if (!userId) {
-      alert('User  ID not found. Please log in again.');
-      navigate('/login'); // Redirect to login if user_id is missing
-      return;
-    }
 
-    try {
-      const response = await fetch(`http://localhost:3000/api/taskslist?user_id=${userId}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch tasks');
-      }
-
-      setTasks(data); // Update state with fetched tasks
-    } catch (error) {
-      console.error('Error fetching tasks:', error.message);
-      alert(error.message || 'An error occurred while fetching tasks');
-    }
-  };
+ 
 
   return (
     <header className="bg-gray-100 h-12 flex items-center px-4 shadow-md">

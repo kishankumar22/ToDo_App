@@ -6,6 +6,7 @@ import taskRoutes from './routes/taskRoutes.js';
 
 
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -24,7 +25,7 @@ app.get('/', (req, res) => {
 app.use('/api', registrationRoutes);  // All registration routes will now be prefixed with '/api'
 
 // Use auth routes for login
-app.use('/api', authRoutes);  
+app.use('/api',authRoutes);  
 app.use('/api', registrationRoutes);
 app.use('/api', taskRoutes);
 // Start the server

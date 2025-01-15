@@ -25,7 +25,6 @@ const LastTwoDays = () => {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch tasks');
       }
-
       setTasks(data);
     } catch (error) {
       console.error('Error fetching tasks:', error.message);
