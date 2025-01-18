@@ -1,0 +1,110 @@
+create database todoApp;
+use todoApp;CREATE DATABASE IF NOT EXISTS todoApp;
+
+USE todoApp;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    mobile VARCHAR(10) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+select password from users;
+select * from users;
+SELECT * FROM users WHERE email = 'test@example.com' OR mobile = '6387478842';
+
+SELECT * FROM tasks
+WHERE title REGEXP '^[A-Za-z0-9]+$';
+SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = 1 AND completed = false ;
+ -- Kishan@1
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+select * from tasks ;
+select  title , completed from tasks where
+user_id=1;
+-- drop table tasks;
+-- truncate table users;
+INSERT INTO tasks (user_id, title, completed) 
+VALUES (1, 'Completed Project', false);
+-- alter table tasks
+-- rename  column name to title;
+
+SELECT t.id,u.name, u.id as user_id, t.title, t.completed, t.created_at 
+FROM tasks t
+JOIN users u ON t.user_id = u.id
+WHERE u.id = 2;	
+
+select * from tasks 
+where completed =1;
+
+SELECT * FROM tasks WHERE completed = TRUE;
+SELECT * FROM tasks WHERE completed = FALSE;
+
+
+
+SELECT t.id, t.title, t.completed, t.created_at 
+FROM tasks t
+WHERE t.user_id = 1 AND t.completed = true;
+
+SELECT u.id AS user_id, t.id,   u.name as name, t.title AS task_title, t.completed
+FROM users u
+JOIN tasks t ON u.id = t.user_id;
+ select * from tasks;
+ select * from users;
+ DESCRIBE users;
+
+ ALTER TABLE users ADD COLUMN session_id VARCHAR(255) DEFAULT NULL;
+ ALTER TABLE users DROP COLUMN session_id;
+
+ -- uncomplete task task list jo uncomplete hai 
+ select  t.completed ,t.title, u.name,u.id  from tasks t  left join  users u on 
+ u.id=t.user_id 
+ WHERE completed = False;
+ 
+ SELECT u.id AS user_id, u.name AS name, t.title AS task_title, t.completed
+    FROM users u
+    JOIN tasks t ON u.id = t.user_id
+    WHERE u.id = 1;
+    select title ,completed from tasks where user_id=2;
+
+SELECT id, title, completed,date(created_at) FROM tasks;
+ select date(created_at) from tasks;
+update  tasks
+set completed=1 where
+user_id=1 and id=10;
+
+
+
+SELECT  title, completed FROM tasks
+WHERE DATE(created_at) = CURDATE() OR DATE(created_at) = CURDATE() - INTERVAL 1 DAY and user_id=2;
+-- yesterday data
+SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
+FROM tasks 
+WHERE user_id = 1 
+AND DATE(created_at) = CURDATE() - INTERVAL 2 DAY;
+select* from tasks where user_id=1;
+
+--  today data 
+SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = 2 
+and DATE(created_at) = CURDATE();
+ update tasks  set created_at="01-02-2025 05:45:45" where id=47;
+UPDATE tasks 
+SET created_at = '2025-01-12 05:55:45' 
+WHERE id = 35;
+
+SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
+FROM tasks WHERE user_id = 1  AND DATE(created_at) = CURDATE() - INTERVAL 2 DAY; 
+
+
+SELECT id, title, completed ,created_at FROM tasks where user_id=2 ;
+
+INSERT INTO tasks (user_id, title, completed) 
+VALUES (1, 'task not completed', false);
