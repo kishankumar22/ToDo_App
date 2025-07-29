@@ -16,7 +16,7 @@ app.use(cors()); // To allow cross-origin requests
 
 // Test Route
 app.get('/', (req, res) => {
-  res.send('Hello, Server is running! to do app');
+  res.send('Hello, Server is running ! to do app');
 });
 
 

@@ -1,294 +1,199 @@
 import express from 'express';
-import db from '../config/db.js';
+import prisma from '../config/db.js';
 
 const router = express.Router();
 
+// 1. Show today's tasks (incomplete)
+router.get('/todaytask', async (req, res) => {
+  const userId = parseInt(req.query.user_id);
+  if (!userId) return res.status(400).json({ error: 'User ID is required' });
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-//1. show uncomplete task of user ✅✅✅✅ days
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
 
-router.get('/todaytask', (req, res) => {
-  const userId = req.query.user_id; // Get user_id from query parameters
-if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        user_id: userId,
+        created_at: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+      orderBy: { title: 'desc' },
+    });
+
+    if (tasks.length > 0) res.json(tasks);
+    else res.status(404).json({ message: 'No tasks found for today' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
   }
-  db.query(
-    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date FROM tasks WHERE user_id = ? 
-          and DATE(created_at) = CURDATE() order by title desc`,
-    [userId],
-    (err, results) => {
-      if (err) {
-        console.error('Database query failed:', err.message);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-
-      if (results.length > 0) {
-        return res.json(results); // Send tasks back to the frontend
-      } else {
-        return res.status(404).json({ message: 'No tasks found' });
-      }
-    }
-  );
-});
-
-// todays task displays  yesterday
-
-router.get('/yestask', (req, res) => {
-  const userId = req.query.user_id; // Get user_id from query parameters
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  db.query(
-    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
-     FROM tasks WHERE user_id = ?  AND DATE(created_at) = CURDATE() - INTERVAL 1 DAY; `,
-    [userId],
-    (err, results) => {
-      if (err) {
-        console.error('Database query failed:', err.message);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-
-      if (results.length > 0) {
-        return res.json(results); // Send tasks back to the frontend
-      } else {
-        return res.status(404).json({ message: 'No tasks found' });
-      }
-    }
-  );
-});
-
-// task displays of 48 hours  
-
-router.get('/lasttwodays', (req, res) => {
-  const userId = req.query.user_id; // Get user_id from query parameters
-if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  db.query(
-    `SELECT id, title, completed, DATE_FORMAT(created_at, '%m/%d/%Y') as date 
-    FROM tasks  WHERE user_id = ? AND DATE(created_at) = CURDATE() - INTERVAL 2 DAY; `,
-    [userId],
-    (err, results) => {
-      if (err) {
-        console.error('Database query failed:', err.message);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-
-      if (results.length > 0) {
-        return res.json(results); // Send tasks back to the frontend
-      } else {
-        return res.status(404).json({ message: 'No tasks found' });
-      }
-    }
-  );
 });
 
 
-// //2.show completed  task  ✅✅✅✅
-// router.get('/completed', (req, res) => {
-//   const userId = req.query.user_id; // Get user_id from query parameters
-// if (!userId) {
-//     return res.status(400).json({ error: 'User ID is required' });
-//   }
-//   db.query(
-//     `SELECT id, title, completed FROM tasks WHERE user_id = ? and completed=false  order by title desc `,
-//     [userId],
-//     (err, results) => {
-//       if (err) {
-//         console.error('Database query failed:', err.message);
-//         return res.status(500).json({ error: 'Database query failed' });
-//       }
+// 2. Yesterday's tasks
+router.get('/yestask', async (req, res) => {
+  const userId = parseInt(req.query.user_id);
+  if (!userId) return res.status(400).json({ error: 'User ID is required' });
 
-//       if (results.length > 0) {
-//         return res.json(results); // Send tasks back to the frontend
-//       } else {
-//         return res.status(404).json({ message: 'No tasks found' });
-//       }
-//     }
-//   );
-// });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        user_id: userId,
+        created_at: {
+          gte: yesterday,
+          lt: today,
+        },
+      },
+      orderBy: { title: 'desc' },
+    });
+
+    if (tasks.length > 0) res.json(tasks);
+    else res.status(404).json({ message: 'No tasks found for yesterday' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
 
 
+// 3. Last 2 days' tasks
+router.get('/lasttwodays', async (req, res) => {
+  const userId = parseInt(req.query.user_id);
+  if (!userId) return res.status(400).json({ error: 'User ID is required' });
 
-//3. Add a new task  ✅✅✅✅
-router.post('/addtask', (req, res) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
+  const twoDaysAgo = new Date(today);
+  twoDaysAgo.setDate(today.getDate() - 2);
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        user_id: userId,
+        created_at: {
+          gte: twoDaysAgo,
+          lt: today, // ends at start of today
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    if (tasks.length > 0) res.json(tasks);
+    else res.status(404).json({ message: 'No tasks found in last 2 days' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+
+// 4. Add a task
+router.post('/addtask', async (req, res) => {
   const { user_id, title } = req.body;
 
   if (!user_id || !title) {
-    return res.status(400).json({ error: 'User ID and Task name are required' });
+    return res.status(400).json({ error: 'User ID and Title are required' });
   }
-  const query = 'INSERT INTO tasks (user_id, title) VALUES (?, ?)';
-  db.query(query, [user_id, title], (err) => {
-    if (err) {
-      console.error('❌ Failed to add task:', err.message);
-      return res.status(500).json({ error: 'Failed to add task' });
-    }
-    res.status(201).json({ message: 'Task added successfully' });
-  });
-});
 
-
-//4. DELETE endpoint to remove a task by ID✅✅✅✅
-router.delete('/deletetask/:id', (req, res) => {
-    const taskId = req.params.id; // Get the task ID from the URL parameters
-  
-    if (!taskId) {
-      return res.status(400).json({ error: 'Task ID is required' });
-    }
-  
-    const query = 'DELETE FROM tasks WHERE id = ?';
-    db.query(query, [taskId], (err, results) => {
-      if (err) {
-        console.error('❌ Failed to delete task:', err.message);
-        return res.status(500).json({ error: 'Failed to delete task' });
-      }
-  
-      // Check if any rows were affected (i.e., if the task existed)
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: 'Task not found' });
-      }
-  
-      res.status(200).json({ message: 'Task deleted successfully' });
+  try {
+    const newTask = await prisma.task.create({
+      data: {
+        user_id: parseInt(user_id), // 👈 convert to number
+        title,
+      },
     });
-  });
 
-
-
-  // 5. update task PUT endpoint to update a task by ID✅✅✅✅
-  
-router.put('/updatetask/:id', (req, res) => {
-  const taskId = req.params.id; // Get the task ID from the URL parameters
-  const { title } = req.body; // Get the new title from the request body
-
-  if (!taskId) {
-    return res.status(400).json({ error: 'Task ID is required' });
+    res.status(201).json({ message: 'Task added', task: newTask });
+  } catch (error) {
+    console.error('❌ Prisma Error:', error.message);
+    res.status(500).json({ error: 'Failed to create task' });
   }
-
-  if (!title) {
-    return res.status(400).json({ error: 'New title is required' });
-  }
-
-  const query = 'UPDATE tasks SET title = ? WHERE id = ?';
-  db.query(query, [title, taskId], (err, results) => {
-    if (err) {
-      console.error('❌ Failed to update task:', err.message);
-      return res.status(500).json({ error: 'Failed to update task' });
-    }
-
-    // Check if any rows were affected (i.e., if the task existed)
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-
-    res.status(200).json({ message: 'Task updated successfully' });
-  });
 });
 
-  // 6. update checkbox  task complted✅✅✅✅
-  router.put('/checkboxtask/:id', (req, res) => {
-    const taskId = req.params.id; // Get the task ID from the URL parameters
-    const { completed } = req.body; // Get the completed status from the request body
-  
-    if (!taskId) {
-      return res.status(400).json({ error: 'Task ID is required' });
-    }
-  
-    // Ensure completed is a boolean (true or false)
-    if (completed === undefined || completed === null) {
-      return res.status(400).json({ error: 'Completed status is required' });
-    }
-  
-    const query = 'UPDATE tasks SET completed = ? WHERE id = ?';
-    db.query(query, [completed, taskId], (err, results) => {
-      if (err) {
-        console.error('❌ Failed to update task:', err.message);
-        return res.status(500).json({ error: 'Failed to update task' });
-      }
-  
-      // Check if any rows were affected (i.e., if the task existed)
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: 'Task not found' });
-      }
-  
-      res.status(200).json({ message: 'Task updated successfully' });
+
+// 5. Delete task
+router.delete('/deletetask/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  try {
+    const deleted = await prisma.task.delete({ where: { id } });
+    res.status(200).json({ message: 'Task deleted successfully', deleted });
+  } catch (err) {
+    res.status(404).json({ error: 'Task not found' });
+  }
+});
+
+// 6. Update task title
+router.put('/updatetask/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title } = req.body;
+
+  try {
+    const updated = await prisma.task.update({
+      where: { id },
+      data: { title },
     });
-  });
-  
-  // 7. update checkbox  task complted✅✅✅✅
-  
-router.put('/uncheckboxtask/:id', (req, res) => {
-  const taskId = req.params.id; // Get the task ID from the URL parameters
-  const { completed } = req.body; // Get the new title from the request body
-
-  if (!taskId) {
-    return res.status(400).json({ error: 'Task ID is required' });
+    res.status(200).json({ message: 'Task updated successfully', updated });
+  } catch (err) {
+    res.status(404).json({ error: 'Task not found' });
   }
-
-  if (completed === undefined) {
-    return res.status(400).json({ error: 'Completed status is required' });
-  }  
-
-  const query = 'UPDATE tasks SET completed = ? WHERE id = ?';
-  db.query(query, [completed, taskId], (err, results) => {
-    if (err) {
-      console.error('❌ Failed to update task:', err.message);
-      return res.status(500).json({ error: 'Failed to update task' });
-    }
-
-    // Check if any rows were affected (i.e., if the task existed)
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-
-    res.status(200).json({ message: 'Task updated successfully' });
-  });
 });
 
+// 7. Update task checkbox
+router.put('/checkboxtask/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { completed } = req.body;
 
-//1. get all users   all or specific
-
-router.get('/tasks', (req, res) => {
-  db.query('SELECT * FROM tasks', (err, results) => {
-    if (err) {
-      console.error('❌ Database query failed:', err.message);
-      return res.status(500).json({ error: 'Database query failed' }); // Send error response
-    }
-  // Check if results are not empty
-    if (results.length > 0) {
-      // Send the results as JSON
-      return res.json(results); // This will send the entire array of user objects
-    } else {
-      // If no users are found, send an appropriate message
-      return res.status(404).json({ message: 'No users found' });
-    }
-  });
+  try {
+    const updated = await prisma.task.update({
+      where: { id },
+      data: { completed },
+    });
+    res.status(200).json({ message: 'Task updated successfully', updated });
+  } catch (err) {
+    res.status(404).json({ error: 'Task not found' });
+  }
 });
 
-//2. Fetch  all  user/ by id ✅✅  
-router.get('/users', (req, res) => {
-
-  const query = 'SELECT * FROM users ';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('❌ Failed to fetch tasks:', err.message);
-      return res.status(500).json({ error: 'Database query failed' });
-    }
-    res.json(results);
-  });
+// 8. Get all tasks
+router.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await prisma.task.findMany();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
+  }
 });
 
-// get user by id
-router.get('/users/:userId', (req, res) => {
-  const { userId } = req.params;
-  const query = 'SELECT * FROM users WHERE id = ?';
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('❌ Failed to fetch tasks:', err.message);
-      return res.status(500).json({ error: 'Database query failed' });
-    }
-    res.json(results);
-  });
+// 9. Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// 10. Get user by ID
+router.get('/users/:userId', async (req, res) => {
+  const id = parseInt(req.params.userId);
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Database query failed' });
+  }
 });
 
 export default router;

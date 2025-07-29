@@ -1,46 +1,32 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
-// Create the context
 const TaskContext = createContext();
 
-// Custom hook to use the TaskContext
 export const useTask = () => useContext(TaskContext);
 
-// TaskProvider to wrap the app
 export const TaskProvider = ({ children }) => {
-  const [tasks, setTasks] = useState([]); // Shared state for tasks
-  
+  const [tasks, setTasks] = useState([]);
 
-  // Add a new task to the list
-  const addTask = (newTask) => {
+  // Memoized methods to prevent re-creation on each render
+  const addTask = useCallback((newTask) => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
-  };
+  }, []);
 
-  // Update the entire list of tasks (e.g., after fetching)
-  const updateTasks = (updatedTasks) => {
+  const updateTasks = useCallback((updatedTasks) => {
     setTasks(updatedTasks);
-  };
+  }, []);
 
-  // Remove a task from the list
-  const removeTask = (taskId) => {
+  const removeTask = useCallback((taskId) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-  };
+  }, []);
 
-  // Update a specific task in the list
-  const editTask = (taskId, updatedTitle) => {
+  const editTask = useCallback((taskId, updatedTitle) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === taskId ? { ...task, title: updatedTitle } : task
       )
     );
-  };
-  const editTaskyes = (taskId, updatedTitle) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, title: updatedTitle } : task
-      )
-    );
-  };
+  }, []);
 
   return (
     <TaskContext.Provider

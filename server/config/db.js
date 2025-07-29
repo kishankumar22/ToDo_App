@@ -1,26 +1,42 @@
-// config/db.js
-import mysql from 'mysql2';
-import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 
-dotenv.config(); // Load environment variables
-
-// Create a database connection
-const con = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
+const prisma = new PrismaClient({
+  log: [
+    {
+      emit: 'event',
+      level: 'query',
+    },
+    {
+      emit: 'event',
+      level: 'error',
+    },
+  ],
 });
 
-// Connect to the database
-con.connect((err) => {
-  if (err) {
-    console.error('❌ Database connection failed:', err.message);
-    return;
-  }
-  console.log('✅ Successfully connected to the database.');
+// 👉 Query log handler
+// prisma.$on('query', (e) => {
+//   console.log('🟢 Prisma Query:', e.query);
+//   console.log('⏱ Duration:', e.duration + 'ms');
+// });
+
+// 👉 Error log handler
+prisma.$on('error', (e) => {
+  console.error('❌ Prisma Error:', e.message);
 });
 
-// Export the connection to use in other files
-export default con;
+// Connect
+prisma.$connect()
+  .then(() => console.log('✅ Prisma: Connected to database'))
+  .catch((error) => {
+    console.error('❌ Prisma connection failed:', error.message);
+    process.exit(1);
+  });
+
+// Graceful disconnect on exit
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  console.log('🔌 Prisma: Disconnected from database (SIGINT)');
+  process.exit(0);
+});
+
+export default prisma;

@@ -22,7 +22,7 @@ export const deleteTask = (user_id, id) => {
 
 //4. Update task title
 export const updateTask = (id, title) => {
-  return api.put(`/updatetask/${id}`, { title }); // Send the new title in the request body
+  return api.put(`/updatetask/${id}`, { title });
 };
 
 //5. update checkbox

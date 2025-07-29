@@ -13,27 +13,28 @@ const TodayTask = () => {
   const [editingTitle, setEditingTitle] = useState('');
 
   // Fetch tasks on component mount
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const userId = localStorage.getItem('user_id');
-      if (!userId) {
-        alert('User ID not found. Please log in again.');
-        navigate('/login');
-        return;
-      }
+useEffect(() => {
+  const fetchTasks = async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      alert('User ID not found. Please log in again.');
+      navigate('/login');
+      return;
+    }
 
-      try {
-        const response = await axios.get('http://localhost:3000/api/todaytask', {
-          params: { user_id: userId },
-        });
-        updateTasks(response.data); // Update tasks in context
-      } catch (error) {
-        console.error('Error fetching tasks:', error.message);
-      }
-    };
+    try {
+      const response = await axios.get('http://localhost:3000/api/todaytask', {
+        params: { user_id: userId },
+      });
+      updateTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error.message);
+    }
+  };
 
-    fetchTasks();
-  }, [navigate, updateTasks]);
+  fetchTasks();
+}, [navigate, updateTasks]); // ✅ Now stable due to memoization
+
 
   const handleDelete = async (taskId) => {
     const userId = localStorage.getItem('user_id');

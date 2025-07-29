@@ -1,0 +1,28 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  email      String   @unique @db.VarChar(100)
+  mobile     String   @db.VarChar(10)
+  password   String   @db.VarChar(255)
+  created_at DateTime @default(now()) @map("created_at")
+  tasks      Task[]
+}
+
+model Task {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int
+  title      String   @db.VarChar(255)
+  completed  Boolean  @default(false)
+  created_at DateTime @default(now()) @map("created_at")
+}
